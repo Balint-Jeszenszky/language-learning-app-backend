@@ -6,6 +6,7 @@ import hu.bme.aut.viauma06.language_learning.controller.exceptions.NotFoundExcep
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.UnauthorizedException;
 import hu.bme.aut.viauma06.language_learning.mapper.UserMapper;
 import hu.bme.aut.viauma06.language_learning.model.ERole;
+import hu.bme.aut.viauma06.language_learning.model.RefreshToken;
 import hu.bme.aut.viauma06.language_learning.model.Role;
 import hu.bme.aut.viauma06.language_learning.model.User;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.LoginRequest;
@@ -13,26 +14,32 @@ import hu.bme.aut.viauma06.language_learning.model.dto.request.RegistrationReque
 import hu.bme.aut.viauma06.language_learning.model.dto.response.LoginResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.NewTokenResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.UserDetailsResponse;
+import hu.bme.aut.viauma06.language_learning.repository.RefreshTokenRepository;
 import hu.bme.aut.viauma06.language_learning.repository.RoleRepository;
 import hu.bme.aut.viauma06.language_learning.repository.UserRepository;
 import hu.bme.aut.viauma06.language_learning.security.jwt.JwtUtils;
 import hu.bme.aut.viauma06.language_learning.security.service.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@EnableScheduling
 public class AuthService {
 
     @Autowired
@@ -43,6 +50,9 @@ public class AuthService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
     JwtUtils jwtUtils;
@@ -68,6 +78,8 @@ public class AuthService {
         User user = userRepository.findById(((UserDetailsImpl) authentication.getPrincipal()).getId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
+        saveRefreshToken(refreshJwt, user);
+
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setUserDetails(UserMapper.INSTANCE.userToUserDetailsResponse(user));
         loginResponse.setAccessToken(jwt);
@@ -81,6 +93,15 @@ public class AuthService {
             throw new UnauthorizedException("Wrong refresh token");
         }
 
+        String hashOfJwtToken = getHashOfJwtToken(refreshToken);
+        Optional<RefreshToken> storedToken = refreshTokenRepository.findByTokenHash(hashOfJwtToken);
+
+        if (storedToken.isEmpty()) {
+            throw new UnauthorizedException("Wrong refresh token");
+        }
+
+        refreshTokenRepository.delete(storedToken.get());
+
         String email = jwtUtils.getEmailFromJwtRefreshToken(refreshToken);
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UnauthorizedException("User not found"));
@@ -93,6 +114,8 @@ public class AuthService {
         NewTokenResponse newTokenResponse = new NewTokenResponse();
         newTokenResponse.setAccessToken(jwt);
         newTokenResponse.setRefreshToken(refreshJwt);
+
+        saveRefreshToken(refreshJwt, user);
 
         return newTokenResponse;
     }
@@ -140,6 +163,13 @@ public class AuthService {
         return userDetailsResponse;
     }
 
+    public void logout(String refreshToken) {
+        Optional<RefreshToken> storedToken = refreshTokenRepository.findByTokenHash(getHashOfJwtToken(refreshToken));
+        if (storedToken.isPresent()) {
+            refreshTokenRepository.delete(storedToken.get());
+        }
+    }
+
     private void validateEmail(String email) {
         Pattern emailPattern = Pattern.compile("^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$");
         Matcher emailMatcher = emailPattern.matcher(email);
@@ -152,5 +182,28 @@ public class AuthService {
     private void createDefaultRoles() {
         roleRepository.save(new Role(ERole.ROLE_TEACHER));
         roleRepository.save(new Role(ERole.ROLE_STUDENT));
+    }
+
+    private void saveRefreshToken(String token, User user) {
+        String tokenHash = getHashOfJwtToken(token);
+        Date expiration = jwtUtils.getRefreshTokenExpiration(token);
+        refreshTokenRepository.save(new RefreshToken(tokenHash, expiration, user));
+    }
+
+    private String getHashOfJwtToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return String.copyValueOf(Hex.encode(hash));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException(e.getMessage());
+        }
+    }
+
+    @Scheduled(cron = "1 * * * * ?", zone = "Europe/Budapest")
+    private void clearExpiredRefreshTokens() {
+        List<RefreshToken> expired = refreshTokenRepository.findByExpirationLessThan(new Date());
+        refreshTokenRepository.deleteAllInBatch(expired);
     }
 }

@@ -53,6 +53,7 @@ public class WebSecurityConfig {
                 .antMatchers(HttpMethod.POST,"/api/auth/register").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/auth/login/teacher").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/auth/login/refresh").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                 .antMatchers("/*").permitAll()
                 .antMatchers("/static/**").permitAll()
                 .anyRequest().authenticated();

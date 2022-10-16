@@ -1,7 +1,7 @@
 package hu.bme.aut.viauma06.language_learning.controller;
 
 import hu.bme.aut.viauma06.language_learning.model.dto.request.LoginRequest;
-import hu.bme.aut.viauma06.language_learning.model.dto.request.NewTokenRequest;
+import hu.bme.aut.viauma06.language_learning.model.dto.request.RefreshTokenRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.RegistrationRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.LoginResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.NewTokenResponse;
@@ -35,8 +35,8 @@ public class AuthController {
     }
 
     @PostMapping("/login/refresh")
-    public ResponseEntity<NewTokenResponse> refresh(@RequestBody NewTokenRequest newTokenRequest) {
-        NewTokenResponse newTokenResponse = authService.refreshLogin(newTokenRequest.getRefreshToken());
+    public ResponseEntity<NewTokenResponse> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        NewTokenResponse newTokenResponse = authService.refreshLogin(refreshTokenRequest.getRefreshToken());
 
         return new ResponseEntity(newTokenResponse, HttpStatus.OK);
     }
@@ -46,5 +46,12 @@ public class AuthController {
         UserDetailsResponse userDetailsResponse = authService.registerTeacher(registrationRequest);
 
         return new ResponseEntity(userDetailsResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity logout(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        authService.logout(refreshTokenRequest.getRefreshToken());
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

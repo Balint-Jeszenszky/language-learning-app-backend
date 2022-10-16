@@ -85,6 +85,10 @@ public class JwtUtils {
         return validateToken(refreshToken, jwtRefreshSecret);
     }
 
+    public Date getRefreshTokenExpiration(String token) {
+        return Jwts.parser().setSigningKey(jwtRefreshSecret).parseClaimsJws(token).getBody().getExpiration();
+    }
+
     private boolean validateToken(String token, String secret) {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
