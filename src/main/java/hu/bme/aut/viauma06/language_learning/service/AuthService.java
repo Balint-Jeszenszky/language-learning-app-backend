@@ -143,16 +143,17 @@ public class AuthService {
             throw new BadRequestException("Error: Passwords not match!");
         }
 
-        User user = new User(
-                registrationRequest.getName(),
-                email,
-                passwordEncoder.encode(registrationRequest.getPassword())
-        );
-
         Set<Role> roles = new HashSet<>();
 
         roles.add(roleRepository.findByName(ERole.ROLE_TEACHER)
                 .orElseThrow(() -> new InternalServerErrorException("Error: Role is not found.")));
+
+        User user = new User(
+                registrationRequest.getName(),
+                email,
+                passwordEncoder.encode(registrationRequest.getPassword()),
+                roles
+        );
 
         user.setRoles(roles);
 
@@ -201,7 +202,7 @@ public class AuthService {
         }
     }
 
-    @Scheduled(cron = "1 * * * * ?", zone = "Europe/Budapest")
+    @Scheduled(cron = "0 3 * * * ?", zone = "Europe/Budapest")
     private void clearExpiredRefreshTokens() {
         List<RefreshToken> expired = refreshTokenRepository.findByExpirationLessThan(new Date());
         refreshTokenRepository.deleteAllInBatch(expired);

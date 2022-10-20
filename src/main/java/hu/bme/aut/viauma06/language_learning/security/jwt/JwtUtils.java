@@ -66,9 +66,8 @@ public class JwtUtils {
         Integer id = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().get(ID, Integer.class);
         List<String> roles = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().get(ROLES, List.class);
 
-        User user = new User(name, email, null);
+        User user = new User(name, email, null, roles.stream().map(r -> new Role(ERole.valueOf(r))).collect(Collectors.toSet()));
         user.setId(id);
-        user.setRoles(roles.stream().map(r -> new Role(ERole.valueOf(r))).collect(Collectors.toSet()));
 
         return user;
     }
