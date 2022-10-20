@@ -26,7 +26,11 @@ public class Course {
     @JoinTable(name = "course_students",
             joinColumns = @JoinColumn(name = "course_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id"))
-    private List<User> students = new ArrayList<>();
+    private List<User> students = new ArrayList();
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "course_id")
+    private List<WordPair> words = new ArrayList();
 
     public Course() {
     }
@@ -75,5 +79,13 @@ public class Course {
 
     public void setStudents(List<User> students) {
         this.students = students;
+    }
+
+    public List<WordPair> getWords() {
+        return words;
+    }
+
+    public void setWords(List<WordPair> words) {
+        this.words = words;
     }
 }
