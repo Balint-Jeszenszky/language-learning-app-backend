@@ -6,6 +6,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(name = "WordPair")
 @Table(name = "word_pair")
@@ -79,5 +80,18 @@ public class WordPair {
 
     public void setMetadata(List<String> metadata) {
         this.metadata = metadata;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WordPair wordPair = (WordPair) o;
+        return Objects.equals(id, wordPair.id) && Objects.equals(word, wordPair.word) && Objects.equals(translation, wordPair.translation) && Objects.equals(course, wordPair.course) && Objects.equals(metadata, wordPair.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, word, translation, course, metadata);
     }
 }

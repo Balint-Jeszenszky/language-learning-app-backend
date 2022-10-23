@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(name = "Course")
 @Table(name = "course")
@@ -25,8 +26,11 @@ public class Course {
     @ManyToMany
     @JoinTable(name = "course_students",
             joinColumns = @JoinColumn(name = "course_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id"))
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> students = new ArrayList();
+
+    @OneToMany(mappedBy = "course")
+    private List<CourseStudentAccess> courseAccess = new ArrayList();
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "course_id")
@@ -81,11 +85,32 @@ public class Course {
         this.students = students;
     }
 
+    public List<CourseStudentAccess> getCourseAccess() {
+        return courseAccess;
+    }
+
+    public void setCourseAccess(List<CourseStudentAccess> courseAccess) {
+        this.courseAccess = courseAccess;
+    }
+
     public List<WordPair> getWords() {
         return words;
     }
 
     public void setWords(List<WordPair> words) {
         this.words = words;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(deadline, course.deadline) && Objects.equals(teacher, course.teacher) && Objects.equals(students, course.students) && Objects.equals(courseAccess, course.courseAccess) && Objects.equals(words, course.words);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, deadline, teacher, students, courseAccess, words);
     }
 }

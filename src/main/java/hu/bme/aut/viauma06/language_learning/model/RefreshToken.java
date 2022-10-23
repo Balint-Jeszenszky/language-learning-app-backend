@@ -2,6 +2,7 @@ package hu.bme.aut.viauma06.language_learning.model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity(name = "RefreshToken")
 @Table(name = "refresh_token")
@@ -59,5 +60,18 @@ public class RefreshToken {
 
     public void setExpiration(Date expiration) {
         this.expiration = expiration;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RefreshToken that = (RefreshToken) o;
+        return Objects.equals(id, that.id) && Objects.equals(tokenHash, that.tokenHash) && Objects.equals(expiration, that.expiration) && Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, tokenHash, expiration, user);
     }
 }
