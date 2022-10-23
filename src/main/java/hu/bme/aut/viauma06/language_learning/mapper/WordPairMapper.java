@@ -9,5 +9,5 @@ import org.mapstruct.factory.Mappers;
 public interface WordPairMapper {
     WordPairMapper INSTANCE = Mappers.getMapper(WordPairMapper.class);
 
-    WordPairResponse wordPairToWordPairResponse(WordPair í);
+    WordPairResponse wordPairToWordPairResponse(WordPair wordPair);
 }

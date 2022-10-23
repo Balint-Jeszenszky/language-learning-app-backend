@@ -19,6 +19,7 @@ import hu.bme.aut.viauma06.language_learning.repository.RoleRepository;
 import hu.bme.aut.viauma06.language_learning.repository.UserRepository;
 import hu.bme.aut.viauma06.language_learning.security.jwt.JwtUtils;
 import hu.bme.aut.viauma06.language_learning.security.service.UserDetailsImpl;
+import hu.bme.aut.viauma06.language_learning.service.util.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -122,7 +123,11 @@ public class AuthService {
 
     public UserDetailsResponse registerTeacher(RegistrationRequest registrationRequest) {
         String email = registrationRequest.getEmail().toLowerCase();
-        validateEmail(email);
+
+
+        if (!EmailValidator.validateEmail(email)) {
+            throw new BadRequestException("Error: Email is invalid!");
+        }
 
         Optional<Role> role = roleRepository.findByName(ERole.ROLE_TEACHER);
 
@@ -168,15 +173,6 @@ public class AuthService {
         Optional<RefreshToken> storedToken = refreshTokenRepository.findByTokenHash(getHashOfJwtToken(refreshToken));
         if (storedToken.isPresent()) {
             refreshTokenRepository.delete(storedToken.get());
-        }
-    }
-
-    private void validateEmail(String email) {
-        Pattern emailPattern = Pattern.compile("^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$");
-        Matcher emailMatcher = emailPattern.matcher(email);
-
-        if (!emailMatcher.matches()) {
-            throw new BadRequestException("Error: Email is invalid!");
         }
     }
 

@@ -1,6 +1,11 @@
 package hu.bme.aut.viauma06.language_learning.model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name = "WordPair")
 @Table(name = "word_pair")
@@ -20,12 +25,20 @@ public class WordPair {
     @JoinColumn(name = "course_id", insertable = false, updatable = false)
     private Course course;
 
+    @ElementCollection
+    @CollectionTable(name = "word_metadata", joinColumns = @JoinColumn(name = "word_id"))
+    @JoinColumn(name = "word_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @Column(name = "metadata")
+    private List<String> metadata = new ArrayList();
+
     public WordPair() {
     }
 
-    public WordPair(String word, String translation) {
+    public WordPair(String word, String translation, List<String> metadata) {
         this.word = word;
         this.translation = translation;
+        this.metadata = metadata;
     }
 
     public Integer getId() {
@@ -58,5 +71,13 @@ public class WordPair {
 
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    public List<String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(List<String> metadata) {
+        this.metadata = metadata;
     }
 }
