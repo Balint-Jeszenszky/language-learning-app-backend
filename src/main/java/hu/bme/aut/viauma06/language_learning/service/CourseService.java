@@ -106,32 +106,26 @@ public class CourseService {
                 .collect(Collectors.toList());
 
         newStudents.forEach(s -> {
-            s.setCourses(List.of(storedCourse));
-            s.setCourseAccess(List.of(new CourseStudentAccess(s, storedCourse, RandomStringGenerator.generate(10))));
+            s.setCourses(List.of(course.get()));
         });
 
         userRepository.saveAllAndFlush(newStudents);
-
-        newStudents.forEach(s -> {
-            s.getCourseAccess().get(0).setId(new CourseStudentAccessKey(s.getId(), storedCourse.getId()));
-        });
 
         existingUsers.addAll(newStudents);
 
         storedCourse.setDeadline(courseDetailsRequest.getDeadline());
         storedCourse.setName(courseDetailsRequest.getName());
-        storedCourse.setStudents(existingUsers);
-        courseRepository.save(storedCourse);
+        storedCourse = courseRepository.saveAndFlush(storedCourse);
 
-        List<CourseStudentAccess> courseStudentAccessList = existingUsers.stream().map(u -> {
-            CourseStudentAccess courseStudentAccess = u.getCourseAccess().stream().filter(
-                    c -> c.getCourse().equals(storedCourse)
-            ).findFirst().orElseThrow(() -> new NotFoundException("Course not found"));
-            if (courseStudentAccess.getAccessKey() == null) {
-                courseStudentAccess.setAccessKey(RandomStringGenerator.generate(10));
+        List<CourseStudentAccess> courseStudentAccessList = courseStudentAccessRepository.findAllByCourse(storedCourse);
+
+        existingUsers.removeAll(courseStudentAccessList.stream().map(c -> c.getUser()).toList());
+
+        courseStudentAccessList.forEach(a -> {
+            if (a.getAccessKey() == null) {
+                a.setAccessKey(RandomStringGenerator.generate(10));
             }
-            return courseStudentAccess;
-        }).collect(Collectors.toList());
+        });
 
         courseStudentAccessRepository.saveAll(courseStudentAccessList);
 
