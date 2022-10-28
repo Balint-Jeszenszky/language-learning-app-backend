@@ -29,9 +29,6 @@ public class Course {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> students = new ArrayList();
 
-    @OneToMany(mappedBy = "course")
-    private List<CourseStudentAccess> courseAccess = new ArrayList();
-
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "course_id")
     private List<WordPair> words = new ArrayList();
@@ -85,14 +82,6 @@ public class Course {
         this.students = students;
     }
 
-    public List<CourseStudentAccess> getCourseAccess() {
-        return courseAccess;
-    }
-
-    public void setCourseAccess(List<CourseStudentAccess> courseAccess) {
-        this.courseAccess = courseAccess;
-    }
-
     public List<WordPair> getWords() {
         return words;
     }
@@ -106,11 +95,11 @@ public class Course {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Course course = (Course) o;
-        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(deadline, course.deadline) && Objects.equals(teacher, course.teacher) && Objects.equals(students, course.students) && Objects.equals(courseAccess, course.courseAccess) && Objects.equals(words, course.words);
+        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(deadline, course.deadline) && Objects.equals(teacher, course.teacher) && Objects.equals(students, course.students) && Objects.equals(words, course.words);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, deadline, teacher, students, courseAccess, words);
+        return Objects.hash(id, name, deadline, teacher, students, words);
     }
 }

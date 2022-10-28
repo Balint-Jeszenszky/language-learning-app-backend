@@ -32,9 +32,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     List<Course> courses = new ArrayList();
 
-    @OneToMany(mappedBy = "user")
-    private List<CourseStudentAccess> courseAccess = new ArrayList();
-
     public User() {
     }
 
@@ -93,24 +90,16 @@ public class User {
         this.courses = courses;
     }
 
-    public List<CourseStudentAccess> getCourseAccess() {
-        return courseAccess;
-    }
-
-    public void setCourseAccess(List<CourseStudentAccess> courseAccess) {
-        this.courseAccess = courseAccess;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles) && Objects.equals(courses, user.courses) && Objects.equals(courseAccess, user.courseAccess);
+        return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles) && Objects.equals(courses, user.courses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, password, roles, courses, courseAccess);
+        return Objects.hash(id, name, email, password, roles, courses);
     }
 }

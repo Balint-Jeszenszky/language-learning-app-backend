@@ -16,12 +16,11 @@ import hu.bme.aut.viauma06.language_learning.security.service.LoggedInUserServic
 import hu.bme.aut.viauma06.language_learning.service.util.EmailValidator;
 import hu.bme.aut.viauma06.language_learning.service.util.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,13 +39,13 @@ public class CourseService {
     private RoleRepository roleRepository;
 
     @Autowired
-    private CourseStudentAccessRepository courseStudentAccessRepository;
-
-    @Autowired
     private LoggedInUserService loggedInUserService;
 
     @Autowired
     private SendMail sendMail;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public List<CourseResponse> getAllCoursesForTeacher() {
         User loggedInUser = loggedInUserService.getLoggedInUser();
@@ -100,48 +99,37 @@ public class CourseService {
 
         Course storedCourse = course.get();
 
+        Map<String, String> newUserEmailAndPassword = new HashMap();
         List<User> newStudents = courseDetailsRequest.getStudentEmails()
                 .stream()
-                .map(e -> new User(null, e, null, Set.of(studentRole.get())))
+                .map(e -> {
+                    String password = RandomStringGenerator.generate(10);
+                    newUserEmailAndPassword.put(e, password);
+                    return new User(null, e, passwordEncoder.encode(password), Set.of(studentRole.get()));
+                })
                 .collect(Collectors.toList());
 
-        newStudents.forEach(s -> {
-            s.setCourses(List.of(course.get()));
-        });
-
-        userRepository.saveAllAndFlush(newStudents);
+        userRepository.saveAll(newStudents);
 
         existingUsers.addAll(newStudents);
 
         storedCourse.setDeadline(courseDetailsRequest.getDeadline());
         storedCourse.setName(courseDetailsRequest.getName());
-        storedCourse = courseRepository.saveAndFlush(storedCourse);
+        storedCourse.setStudents(existingUsers);
+        courseRepository.save(storedCourse);
 
-        List<CourseStudentAccess> courseStudentAccessList = courseStudentAccessRepository.findAllByCourse(storedCourse);
-
-        existingUsers.removeAll(courseStudentAccessList.stream().map(c -> c.getUser()).toList());
-
-        courseStudentAccessList.forEach(a -> {
-            if (a.getAccessKey() == null) {
-                a.setAccessKey(RandomStringGenerator.generate(10));
-            }
+        newUserEmailAndPassword.entrySet().forEach(e -> {
+            sendMail.sendSimpleMessage(
+                    e.getKey(),
+                    "Registration to " + storedCourse.getName() + " language course",
+                    "Hi! "
+                            + storedCourse.getTeacher().getName()
+                            + "registered you to "
+                            + storedCourse.getName()
+                            + " language course! You can log in with your email and this password: "
+                            + e.getValue()
+            );
         });
-
-        courseStudentAccessRepository.saveAll(courseStudentAccessList);
-
-        // TODO separate thread
-//        newStudents.forEach(s -> {
-//            sendMail.sendSimpleMessage(
-//                    s.getEmail(),
-//                    "Registration to " + storedCourse.getName() + " language course",
-//                    "Hi! "
-//                            + storedCourse.getTeacher().getName()
-//                            + "registered you to "
-//                            + storedCourse.getName()
-//                            + " language course! You can log in with your email and this password: "
-//                            + "TODO" // TODO password
-//            );
-//        });
 
         return CourseMapper.INSTANCE.courseToCourseDetailsResponse(storedCourse);
     }

@@ -22,16 +22,11 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/login/teacher")
-    public ResponseEntity<LoginResponse> loginTeacher(@RequestBody LoginRequest loginRequest) {
-        LoginResponse loginResponse = authService.loginTeacher(loginRequest);
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        LoginResponse loginResponse = authService.login(loginRequest);
 
         return new ResponseEntity(loginResponse, HttpStatus.OK);
-    }
-
-    @PostMapping("/login/student")
-    public ResponseEntity loginStudent() {
-        return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED); // TODO
     }
 
     @PostMapping("/login/refresh")
