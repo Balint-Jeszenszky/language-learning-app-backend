@@ -7,6 +7,7 @@ import hu.bme.aut.viauma06.language_learning.mapper.CourseMapper;
 import hu.bme.aut.viauma06.language_learning.mapper.WordPairMapper;
 import hu.bme.aut.viauma06.language_learning.model.*;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseDetailsRequest;
+import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.WordPairRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseDetailsResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseResponse;
@@ -58,10 +59,22 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    public CourseResponse createCourse(String name) {
+    public CourseResponse getCourseByIdForTeacher(Integer id) {
         User loggedInUser = loggedInUserService.getLoggedInUser();
 
-        Course course = new Course(name, null, loggedInUser);
+        Optional<Course> course = courseRepository.findByIdAndTeacher(id, loggedInUser);
+
+        if (course.isEmpty()) {
+            throw new NotFoundException("Course not found");
+        }
+
+        return CourseMapper.INSTANCE.courseToCourseResponse(course.get());
+    }
+
+    public CourseResponse createCourse(CourseRequest courseRequest) {
+        User loggedInUser = loggedInUserService.getLoggedInUser();
+
+        Course course = new Course(courseRequest.getName(), courseRequest.getDeadline(), loggedInUser);
 
         courseRepository.save(course);
 

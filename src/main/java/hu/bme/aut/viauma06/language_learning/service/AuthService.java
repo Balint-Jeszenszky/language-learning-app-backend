@@ -31,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -87,19 +88,20 @@ public class AuthService {
         return loginResponse;
     }
 
+    @Transactional
     public NewTokenResponse refreshLogin(String refreshToken) {
         if (!jwtUtils.validateJwtRefreshToken(refreshToken)) {
             throw new UnauthorizedException("Wrong refresh token");
         }
 
         String hashOfJwtToken = getHashOfJwtToken(refreshToken);
-        Optional<RefreshToken> storedToken = refreshTokenRepository.findByTokenHash(hashOfJwtToken);
+        Optional<RefreshToken> storedToken = refreshTokenRepository.findFirstByTokenHash(hashOfJwtToken);
 
         if (storedToken.isEmpty()) {
             throw new UnauthorizedException("Wrong refresh token");
         }
 
-        refreshTokenRepository.delete(storedToken.get());
+        refreshTokenRepository.deleteAllByTokenHash(storedToken.get().getTokenHash());
 
         String email = jwtUtils.getEmailFromJwtRefreshToken(refreshToken);
 
@@ -167,11 +169,9 @@ public class AuthService {
         return userDetailsResponse;
     }
 
+    @Transactional
     public void logout(String refreshToken) {
-        Optional<RefreshToken> storedToken = refreshTokenRepository.findByTokenHash(getHashOfJwtToken(refreshToken));
-        if (storedToken.isPresent()) {
-            refreshTokenRepository.delete(storedToken.get());
-        }
+        refreshTokenRepository.deleteAllByTokenHash(getHashOfJwtToken(refreshToken));
     }
 
     private void createDefaultRoles() {
@@ -197,7 +197,7 @@ public class AuthService {
     }
 
     @Scheduled(cron = "0 3 * * * ?", zone = "Europe/Budapest")
-    private void clearExpiredRefreshTokens() {
+    protected void clearExpiredRefreshTokens() {
         List<RefreshToken> expired = refreshTokenRepository.findByExpirationLessThan(new Date());
         refreshTokenRepository.deleteAllInBatch(expired);
     }

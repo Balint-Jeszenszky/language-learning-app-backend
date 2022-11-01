@@ -30,10 +30,18 @@ public class CourseController {
         return new ResponseEntity(allCoursesForTeacher, HttpStatus.OK);
     }
 
+    @GetMapping("/teacher/{id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<CourseResponse> getCourseByIdForTeacher(@PathVariable("id") Integer id) {
+        CourseResponse courseResponse = courseService.getCourseByIdForTeacher(id);
+
+        return new ResponseEntity(courseResponse, HttpStatus.OK);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<CourseResponse> createCourse(@RequestBody CourseRequest courseRequest) {
-        CourseResponse course = courseService.createCourse(courseRequest.getName());
+        CourseResponse course = courseService.createCourse(courseRequest);
 
         return new ResponseEntity(course, HttpStatus.CREATED);
     }
@@ -48,7 +56,7 @@ public class CourseController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity editCourse(@PathVariable("id") Integer id) {
+    public ResponseEntity deleteCourse(@PathVariable("id") Integer id) {
         courseService.deleteCourse(id);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
