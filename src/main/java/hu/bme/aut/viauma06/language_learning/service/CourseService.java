@@ -171,6 +171,7 @@ public class CourseService {
         return wordPairs.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).collect(Collectors.toList());
     }
 
+    @Transactional
     public List<WordPairResponse> updateWordPairs(Integer id, List<WordPairRequest> wordPairsRequest) {
         User loggedInUser = loggedInUserService.getLoggedInUser();
 
@@ -182,13 +183,27 @@ public class CourseService {
 
         Course storedCourse = course.get();
 
-        List<WordPair> newWords = wordPairsRequest.stream().map(w -> new WordPair(w.getWord(), w.getTranslation(), w.getMetadata())).collect(Collectors.toList());
-        newWords.forEach(w -> w.setCourse(storedCourse));
+        List<WordPair> words = wordPairsRequest.stream().map(w -> {
+            WordPair wordPair = storedCourse.getWords()
+                    .stream()
+                    .filter(sw -> sw.getId().equals(w.getId()))
+                    .findFirst()
+                    .orElse(new WordPair());
+            wordPair.setCourse(storedCourse);
+            wordPair.setWord(w.getWord());
+            wordPair.setTranslation(w.getTranslation());
+            wordPair.setMetadata(w.getMetadata());
 
+            return wordPair;
+        }).toList();
+
+        storedCourse.getWords().removeAll(words);
         wordPairRepository.deleteAllInBatch(storedCourse.getWords());
-        storedCourse.setWords(newWords);
-        courseRepository.save(storedCourse);
 
-        return newWords.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).collect(Collectors.toList());
+        storedCourse.getWords().clear();
+        storedCourse.getWords().addAll(words);
+        wordPairRepository.saveAll(words);
+
+        return words.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).toList();
     }
 }
