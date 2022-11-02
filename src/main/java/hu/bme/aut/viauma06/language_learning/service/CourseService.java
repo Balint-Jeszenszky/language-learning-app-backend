@@ -59,7 +59,7 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    public CourseResponse getCourseByIdForTeacher(Integer id) {
+    public CourseDetailsResponse getCourseByIdForTeacher(Integer id) {
         User loggedInUser = loggedInUserService.getLoggedInUser();
 
         Optional<Course> course = courseRepository.findByIdAndTeacher(id, loggedInUser);
@@ -68,7 +68,7 @@ public class CourseService {
             throw new NotFoundException("Course not found");
         }
 
-        return CourseMapper.INSTANCE.courseToCourseResponse(course.get());
+        return CourseMapper.INSTANCE.courseToCourseDetailsResponse(course.get());
     }
 
     public CourseResponse createCourse(CourseRequest courseRequest) {

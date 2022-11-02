@@ -22,7 +22,7 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
-    @GetMapping("/teacher/all")
+    @GetMapping("/all")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<List<CourseResponse>> getAllCoursesForTeacher() {
         List<CourseResponse> allCoursesForTeacher = courseService.getAllCoursesForTeacher();
@@ -32,8 +32,8 @@ public class CourseController {
 
     @GetMapping("/teacher/{id}")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<CourseResponse> getCourseByIdForTeacher(@PathVariable("id") Integer id) {
-        CourseResponse courseResponse = courseService.getCourseByIdForTeacher(id);
+    public ResponseEntity<CourseDetailsResponse> getCourseByIdForTeacher(@PathVariable("id") Integer id) {
+        CourseDetailsResponse courseResponse = courseService.getCourseByIdForTeacher(id);
 
         return new ResponseEntity(courseResponse, HttpStatus.OK);
     }
