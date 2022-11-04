@@ -43,7 +43,7 @@ public class JwtUtils {
                 .claim("type", "access")
                 .claim(NAME, userDetails.getName())
                 .claim(ID, userDetails.getId())
-                .claim(ROLES, userDetails.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList()))
+                .claim(ROLES, userDetails.getAuthorities().stream().map(a -> a.getAuthority()).toList())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();

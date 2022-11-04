@@ -5,6 +5,7 @@ import hu.bme.aut.viauma06.language_learning.controller.exceptions.InternalServe
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.NotFoundException;
 import hu.bme.aut.viauma06.language_learning.mapper.CourseMapper;
 import hu.bme.aut.viauma06.language_learning.model.*;
+import hu.bme.aut.viauma06.language_learning.model.dto.StudentDto;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseDetailsRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.SubmissionRequest;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
@@ -51,7 +51,7 @@ public class CourseService {
         return coursesByTeacher
                 .stream()
                 .map(c -> CourseMapper.INSTANCE.courseToCourseResponse(c))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public CourseDetailsResponse getCourseByIdForTeacher(Integer id) {
@@ -63,7 +63,20 @@ public class CourseService {
             throw new NotFoundException("Course not found");
         }
 
-        return CourseMapper.INSTANCE.courseToCourseDetailsResponse(course.get());
+        CourseDetailsResponse courseDetailsResponse = CourseMapper.INSTANCE.courseToCourseDetailsResponse(course.get());
+        Map<User, Integer> studentScores = new HashMap();
+        course.get().getSubmissions().forEach(s -> {
+            studentScores.put(s.getStudent(), s.getScore());
+        });
+
+        List<StudentDto> students = course.get().getStudents()
+                .stream()
+                .map(s -> new StudentDto(s.getId(), s.getName(), s.getEmail(), studentScores.get(s)))
+                .toList();
+
+        courseDetailsResponse.setStudents(students);
+
+        return courseDetailsResponse;
     }
 
     public CourseResponse createCourse(CourseRequest courseRequest) {
@@ -103,7 +116,7 @@ public class CourseService {
         List<String> invalidEmails = courseDetailsRequest.getStudentEmails()
                 .stream()
                 .filter(e -> !EmailValidator.validateEmail(e))
-                .collect(Collectors.toList());
+                .toList();
 
         if (!invalidEmails.isEmpty()) {
             throw new BadRequestException("Invalid email(s): " + String.join(", ", invalidEmails));
@@ -119,7 +132,7 @@ public class CourseService {
                     newUserEmailAndPassword.put(e, password);
                     return new User(null, e, passwordEncoder.encode(password), Set.of(studentRole.get()));
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         userRepository.saveAll(newStudents);
 

@@ -8,7 +8,6 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Mapper
 public interface UserMapper {
@@ -17,6 +16,6 @@ public interface UserMapper {
     UserDetailsResponse userToUserDetailsResponse(User user);
 
     default List<String> mapRoles(Set<Role> roles) {
-        return roles.stream().map(role -> role.getName().name()).collect(Collectors.toList());
+        return roles.stream().map(role -> role.getName().name()).toList();
     }
 }

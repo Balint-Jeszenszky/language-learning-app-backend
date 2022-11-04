@@ -1,5 +1,7 @@
 package hu.bme.aut.viauma06.language_learning.model.dto.response;
 
+import hu.bme.aut.viauma06.language_learning.model.dto.StudentDto;
+
 import java.util.Date;
 import java.util.List;
 
@@ -8,12 +10,12 @@ public class CourseDetailsResponse {
     private String name;
     private String description;
     private Date deadline;
-    private List<String> students;
+    private List<StudentDto> students;
 
     public CourseDetailsResponse() {
     }
 
-    public CourseDetailsResponse(Integer id, String name, String description, Date deadline, List<String> students) {
+    public CourseDetailsResponse(Integer id, String name, String description, Date deadline, List<StudentDto> students) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -53,11 +55,11 @@ public class CourseDetailsResponse {
         this.deadline = deadline;
     }
 
-    public List<String> getStudents() {
+    public List<StudentDto> getStudents() {
         return students;
     }
 
-    public void setStudents(List<String> students) {
+    public void setStudents(List<StudentDto> students) {
         this.students = students;
     }
 }

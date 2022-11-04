@@ -44,7 +44,7 @@ public class WordPairService {
 
         List<WordPair> wordPairs = wordPairRepository.findAllByCourseId(id);
 
-        return wordPairs.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).collect(Collectors.toList());
+        return wordPairs.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).toList();
     }
 
     @Transactional
