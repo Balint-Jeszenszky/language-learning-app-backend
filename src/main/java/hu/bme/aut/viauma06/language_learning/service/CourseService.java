@@ -4,14 +4,11 @@ import hu.bme.aut.viauma06.language_learning.controller.exceptions.BadRequestExc
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.InternalServerErrorException;
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.NotFoundException;
 import hu.bme.aut.viauma06.language_learning.mapper.CourseMapper;
-import hu.bme.aut.viauma06.language_learning.mapper.WordPairMapper;
 import hu.bme.aut.viauma06.language_learning.model.*;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseDetailsRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseRequest;
-import hu.bme.aut.viauma06.language_learning.model.dto.request.WordPairRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseDetailsResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseResponse;
-import hu.bme.aut.viauma06.language_learning.model.dto.response.WordPairResponse;
 import hu.bme.aut.viauma06.language_learning.repository.*;
 import hu.bme.aut.viauma06.language_learning.security.service.LoggedInUserService;
 import hu.bme.aut.viauma06.language_learning.service.util.EmailValidator;
@@ -29,9 +26,6 @@ public class CourseService {
 
     @Autowired
     private CourseRepository courseRepository;
-
-    @Autowired
-    private WordPairRepository wordPairRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -158,53 +152,5 @@ public class CourseService {
         }
 
         courseRepository.delete(course.get());
-    }
-
-    public List<WordPairResponse> getWordPairsByCourseId(Integer id) {
-        User loggedInUser = loggedInUserService.getLoggedInUser();
-        Optional<Course> course = courseRepository.findByIdAndTeacher(id, loggedInUser);
-        if (course.isEmpty()) {
-            throw new NotFoundException("Course not found");
-        }
-
-        List<WordPair> wordPairs = wordPairRepository.findAllByCourseId(id);
-
-        return wordPairs.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).collect(Collectors.toList());
-    }
-
-    @Transactional
-    public List<WordPairResponse> updateWordPairs(Integer id, List<WordPairRequest> wordPairsRequest) {
-        User loggedInUser = loggedInUserService.getLoggedInUser();
-
-        Optional<Course> course = courseRepository.findByIdAndTeacher(id, loggedInUser);
-
-        if (course.isEmpty()) {
-            throw new NotFoundException("Course not found");
-        }
-
-        Course storedCourse = course.get();
-
-        List<WordPair> words = wordPairsRequest.stream().map(w -> {
-            WordPair wordPair = storedCourse.getWords()
-                    .stream()
-                    .filter(sw -> sw.getId().equals(w.getId()))
-                    .findFirst()
-                    .orElse(new WordPair());
-            wordPair.setCourse(storedCourse);
-            wordPair.setWord(w.getWord());
-            wordPair.setTranslation(w.getTranslation());
-            wordPair.setMetadata(w.getMetadata());
-
-            return wordPair;
-        }).toList();
-
-        storedCourse.getWords().removeAll(words);
-        wordPairRepository.deleteAllInBatch(storedCourse.getWords());
-
-        storedCourse.getWords().clear();
-        storedCourse.getWords().addAll(words);
-        wordPairRepository.saveAll(words);
-
-        return words.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).toList();
     }
 }

@@ -32,6 +32,12 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     List<Course> courses = new ArrayList();
 
+    @ManyToMany
+    @JoinTable(name = "saved_word_pairs",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "word_pair_id"))
+    List<WordPair> wordPairs = new ArrayList();
+
     public User() {
     }
 
@@ -90,16 +96,24 @@ public class User {
         this.courses = courses;
     }
 
+    public List<WordPair> getWordPairs() {
+        return wordPairs;
+    }
+
+    public void setWordPairs(List<WordPair> wordPairs) {
+        this.wordPairs = wordPairs;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles) && Objects.equals(courses, user.courses);
+        return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles) && Objects.equals(courses, user.courses) && Objects.equals(wordPairs, user.wordPairs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, password, roles, courses);
+        return Objects.hash(id, name, email, password, roles, courses, wordPairs);
     }
 }
