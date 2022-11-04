@@ -17,6 +17,9 @@ public class Course {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
     @Column(name = "deadline")
     private Date deadline;
 
@@ -36,8 +39,9 @@ public class Course {
     public Course() {
     }
 
-    public Course(String name, Date deadline, User teacher) {
+    public Course(String name, String description, Date deadline, User teacher) {
         this.name = name;
+        this.description = description;
         this.deadline = deadline;
         this.teacher = teacher;
     }
@@ -56,6 +60,14 @@ public class Course {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Date getDeadline() {

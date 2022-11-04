@@ -5,15 +5,17 @@ import java.util.Date;
 public class CourseResponse {
     private Integer id;
     private String name;
+    private String description;
     private Date deadline;
     private PublicUserDetailsResponse teacher;
 
     public CourseResponse() {
     }
 
-    public CourseResponse(Integer id, String name, Date deadline, PublicUserDetailsResponse teacher) {
+    public CourseResponse(Integer id, String name, String description, Date deadline, PublicUserDetailsResponse teacher) {
         this.id = id;
         this.name = name;
+        this.description = description;
         this.deadline = deadline;
         this.teacher = teacher;
     }
@@ -32,6 +34,14 @@ public class CourseResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Date getDeadline() {

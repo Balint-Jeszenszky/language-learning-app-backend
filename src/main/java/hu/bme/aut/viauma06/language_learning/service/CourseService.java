@@ -74,7 +74,7 @@ public class CourseService {
     public CourseResponse createCourse(CourseRequest courseRequest) {
         User loggedInUser = loggedInUserService.getLoggedInUser();
 
-        Course course = new Course(courseRequest.getName(), courseRequest.getDeadline(), loggedInUser);
+        Course course = new Course(courseRequest.getName(), courseRequest.getDescription(), courseRequest.getDeadline(), loggedInUser);
 
         courseRepository.save(course);
 
@@ -128,6 +128,7 @@ public class CourseService {
 
         storedCourse.setDeadline(courseDetailsRequest.getDeadline());
         storedCourse.setName(courseDetailsRequest.getName());
+        storedCourse.setDescription(courseDetailsRequest.getDescription());
         storedCourse.setStudents(existingUsers);
         courseRepository.save(storedCourse);
 
