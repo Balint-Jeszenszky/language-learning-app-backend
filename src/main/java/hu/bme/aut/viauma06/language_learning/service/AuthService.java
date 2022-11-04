@@ -124,6 +124,9 @@ public class AuthService {
     public UserDetailsResponse registerTeacher(RegistrationRequest registrationRequest) {
         String email = registrationRequest.getEmail().toLowerCase();
 
+        if (registrationRequest.getName().length() < 3) {
+            throw new BadRequestException("Error: Name should be at least 3 characters long!");
+        }
 
         if (!EmailValidator.validateEmail(email)) {
             throw new BadRequestException("Error: Email is invalid!");

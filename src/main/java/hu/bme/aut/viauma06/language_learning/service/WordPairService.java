@@ -1,5 +1,6 @@
 package hu.bme.aut.viauma06.language_learning.service;
 
+import hu.bme.aut.viauma06.language_learning.controller.exceptions.BadRequestException;
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.NotFoundException;
 import hu.bme.aut.viauma06.language_learning.mapper.WordPairMapper;
 import hu.bme.aut.viauma06.language_learning.model.Course;
@@ -49,6 +50,10 @@ public class WordPairService {
     @Transactional
     public List<WordPairResponse> updateWordPairs(Integer id, List<WordPairRequest> wordPairsRequest) {
         User loggedInUser = loggedInUserService.getLoggedInUser();
+
+        if (wordPairsRequest.stream().anyMatch(w -> w.getWord().isEmpty() || w.getTranslation().isEmpty())) {
+            throw new BadRequestException("Error: Word should not be empty");
+        }
 
         Optional<Course> course = courseRepository.findByIdAndTeacher(id, loggedInUser);
 

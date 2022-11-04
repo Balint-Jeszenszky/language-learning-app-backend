@@ -68,6 +68,8 @@ public class CourseService {
     public CourseResponse createCourse(CourseRequest courseRequest) {
         User loggedInUser = loggedInUserService.getLoggedInUser();
 
+        validateCourseName(courseRequest.getName());
+
         Course course = new Course(courseRequest.getName(), courseRequest.getDescription(), courseRequest.getDeadline(), loggedInUser);
 
         courseRepository.save(course);
@@ -78,6 +80,8 @@ public class CourseService {
     @Transactional
     public CourseDetailsResponse editCourse(CourseDetailsRequest courseDetailsRequest) {
         User loggedInUser = loggedInUserService.getLoggedInUser();
+
+        validateCourseName(courseDetailsRequest.getName());
 
         Optional<Course> course = courseRepository.findByIdAndTeacher(courseDetailsRequest.getId(), loggedInUser);
 
@@ -140,6 +144,12 @@ public class CourseService {
         });
 
         return CourseMapper.INSTANCE.courseToCourseDetailsResponse(storedCourse);
+    }
+
+    private void validateCourseName(String name) {
+        if (name.length() < 3) {
+            throw new BadRequestException("Error: Course name should be at least 3 characters");
+        }
     }
 
     public void deleteCourse(Integer id) {
