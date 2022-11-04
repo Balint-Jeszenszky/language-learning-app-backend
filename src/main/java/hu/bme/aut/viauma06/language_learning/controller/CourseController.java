@@ -2,6 +2,7 @@ package hu.bme.aut.viauma06.language_learning.controller;
 
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseDetailsRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseRequest;
+import hu.bme.aut.viauma06.language_learning.model.dto.request.SubmissionRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseDetailsResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseResponse;
 import hu.bme.aut.viauma06.language_learning.service.CourseService;
@@ -58,5 +59,13 @@ public class CourseController {
         courseService.deleteCourse(id);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/submit")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<CourseResponse> submit(@RequestBody SubmissionRequest submissionRequest) {
+        courseService.submit(submissionRequest);
+
+        return new ResponseEntity(HttpStatus.CREATED);
     }
 }

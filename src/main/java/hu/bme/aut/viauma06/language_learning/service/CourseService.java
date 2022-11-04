@@ -7,6 +7,7 @@ import hu.bme.aut.viauma06.language_learning.mapper.CourseMapper;
 import hu.bme.aut.viauma06.language_learning.model.*;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseDetailsRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseRequest;
+import hu.bme.aut.viauma06.language_learning.model.dto.request.SubmissionRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseDetailsResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseResponse;
 import hu.bme.aut.viauma06.language_learning.repository.*;
@@ -162,5 +163,27 @@ public class CourseService {
         }
 
         courseRepository.delete(course.get());
+    }
+
+    public void submit(SubmissionRequest submissionRequest) {
+        User loggedInUser = loggedInUserService.getLoggedInUser();
+
+        Optional<User> user = userRepository.findById(loggedInUser.getId());
+
+        if (user.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+
+        Optional<Course> course = courseRepository.findByIdAndStudents(submissionRequest.getCourseId(), loggedInUser);
+
+        if (course.isEmpty()) {
+            throw new NotFoundException("Course not found");
+        }
+
+        Course storedCourse = course.get();
+
+        storedCourse.getSubmissions().add(new Submission(user.get(), submissionRequest.getScore()));
+
+        courseRepository.save(storedCourse);
     }
 }

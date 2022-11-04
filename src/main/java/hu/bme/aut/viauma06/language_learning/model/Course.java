@@ -36,6 +36,10 @@ public class Course {
     @JoinColumn(name = "course_id")
     private List<WordPair> words = new ArrayList();
 
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "submission_id")
+    private List<Submission> submissions = new ArrayList();
+
     public Course() {
     }
 
@@ -102,16 +106,24 @@ public class Course {
         this.words = words;
     }
 
+    public List<Submission> getSubmissions() {
+        return submissions;
+    }
+
+    public void setSubmissions(List<Submission> submissions) {
+        this.submissions = submissions;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Course course = (Course) o;
-        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(deadline, course.deadline) && Objects.equals(teacher, course.teacher) && Objects.equals(students, course.students) && Objects.equals(words, course.words);
+        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(description, course.description) && Objects.equals(deadline, course.deadline) && Objects.equals(teacher, course.teacher) && Objects.equals(students, course.students) && Objects.equals(words, course.words) && Objects.equals(submissions, course.submissions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, deadline, teacher, students, words);
+        return Objects.hash(id, name, description, deadline, teacher, students, words, submissions);
     }
 }
