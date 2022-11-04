@@ -27,16 +27,10 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     @ManyToMany
-    @JoinTable(name = "course_students",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id"))
-    List<Course> courses = new ArrayList();
-
-    @ManyToMany
     @JoinTable(name = "saved_word_pairs",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "word_pair_id"))
-    List<WordPair> wordPairs = new ArrayList();
+    List<WordPair> savedWordPairs = new ArrayList();
 
     public User() {
     }
@@ -88,20 +82,12 @@ public class User {
         this.roles = roles;
     }
 
-    public List<Course> getCourses() {
-        return courses;
+    public List<WordPair> getSavedWordPairs() {
+        return savedWordPairs;
     }
 
-    public void setCourses(List<Course> courses) {
-        this.courses = courses;
-    }
-
-    public List<WordPair> getWordPairs() {
-        return wordPairs;
-    }
-
-    public void setWordPairs(List<WordPair> wordPairs) {
-        this.wordPairs = wordPairs;
+    public void setSavedWordPairs(List<WordPair> savedWordPairs) {
+        this.savedWordPairs = savedWordPairs;
     }
 
     @Override
@@ -109,11 +95,11 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles) && Objects.equals(courses, user.courses) && Objects.equals(wordPairs, user.wordPairs);
+        return Objects.equals(id, user.id) && Objects.equals(name, user.name) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(roles, user.roles) && Objects.equals(savedWordPairs, user.savedWordPairs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, password, roles, courses, wordPairs);
+        return Objects.hash(id, name, email, password, roles, savedWordPairs);
     }
 }

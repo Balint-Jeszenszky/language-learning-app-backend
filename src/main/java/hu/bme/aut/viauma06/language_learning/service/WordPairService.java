@@ -100,11 +100,23 @@ public class WordPairService {
         }
 
         User storedUser = user.get();
-        storedUser.getWordPairs().add(wordPair.get());
+        storedUser.getSavedWordPairs().add(wordPair.get());
 
         userRepository.save(storedUser);
     }
 
     public void deleteWordPair(Integer id) {
+        User loggedInUser = loggedInUserService.getLoggedInUser();
+
+        Optional<User> user = userRepository.findById(loggedInUser.getId());
+
+        if (user.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+
+        User storedUser = user.get();
+        storedUser.getSavedWordPairs().removeIf(w -> w.getId().equals(id));
+
+        userRepository.save(storedUser);
     }
 }
