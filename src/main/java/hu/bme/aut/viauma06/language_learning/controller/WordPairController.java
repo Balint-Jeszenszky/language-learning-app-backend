@@ -1,6 +1,7 @@
 package hu.bme.aut.viauma06.language_learning.controller;
 
 import hu.bme.aut.viauma06.language_learning.model.dto.request.WordPairRequest;
+import hu.bme.aut.viauma06.language_learning.model.dto.response.StudentWordPairResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.WordPairResponse;
 import hu.bme.aut.viauma06.language_learning.service.WordPairService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,13 @@ public class WordPairController {
         wordPairService.deleteWordPair(id);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/student/words/{id}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<StudentWordPairResponse>> getWordPairsAndSavedStatusByCourseId(@PathVariable("id") Integer id) {
+        List<StudentWordPairResponse> wordPairs = wordPairService.getWordPairsAndSavedStatusByCourseId(id);
+
+        return new ResponseEntity(wordPairs, HttpStatus.OK);
     }
 }
