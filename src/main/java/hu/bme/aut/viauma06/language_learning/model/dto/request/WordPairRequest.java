@@ -6,16 +6,16 @@ public class WordPairRequest {
     private Integer id;
     private String word;
     private String translation;
-    private List<String> metadata;
+
 
     public WordPairRequest() {
     }
 
-    public WordPairRequest(Integer id, String word, String translation, List<String> metadata) {
+    public WordPairRequest(Integer id, String word, String translation) {
         this.id = id;
         this.word = word;
         this.translation = translation;
-        this.metadata = metadata;
+
     }
 
     public Integer getId() {
@@ -28,9 +28,5 @@ public class WordPairRequest {
 
     public String getTranslation() {
         return translation;
-    }
-
-    public List<String> getMetadata() {
-        return metadata;
     }
 }

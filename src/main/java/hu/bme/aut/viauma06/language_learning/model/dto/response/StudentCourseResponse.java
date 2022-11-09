@@ -2,6 +2,7 @@ package hu.bme.aut.viauma06.language_learning.model.dto.response;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 public class StudentCourseResponse {
     private Integer id;
@@ -9,14 +10,17 @@ public class StudentCourseResponse {
     private String description;
     private Instant deadline;
 
+    private List<String> metadata;
+
     public StudentCourseResponse() {
     }
 
-    public StudentCourseResponse(Integer id, String name, String description, Date deadline) {
+    public StudentCourseResponse(Integer id, String name, String description, Date deadline, List<String> metadata) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.deadline = deadline.toInstant();
+        this.metadata = metadata;
     }
 
     public Integer getId() {
@@ -49,5 +53,13 @@ public class StudentCourseResponse {
 
     public void setDeadline(Date deadline) {
         this.deadline = deadline.toInstant();
+    }
+
+    public void setMetadata(List<String> metadata) {
+        this.metadata = metadata;
+    }
+
+    public List<String> getMetadata() {
+        return metadata;
     }
 }

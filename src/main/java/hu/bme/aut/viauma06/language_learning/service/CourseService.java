@@ -85,7 +85,7 @@ public class CourseService {
 
         validateCourseName(courseRequest.getName());
 
-        Course course = new Course(courseRequest.getName(), courseRequest.getDescription(), courseRequest.getDeadline(), loggedInUser);
+        Course course = new Course(courseRequest.getName(), courseRequest.getDescription(), courseRequest.getDeadline(), loggedInUser, courseRequest.getMetadata());
 
         courseRepository.save(course);
 

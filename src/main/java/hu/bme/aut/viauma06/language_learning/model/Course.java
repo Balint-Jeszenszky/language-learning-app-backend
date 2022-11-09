@@ -1,5 +1,8 @@
 package hu.bme.aut.viauma06.language_learning.model;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,14 +43,22 @@ public class Course {
     @JoinColumn(name = "submission_id")
     private List<Submission> submissions = new ArrayList();
 
+    @ElementCollection
+    @CollectionTable(name = "course_metadata", joinColumns = @JoinColumn(name = "course_id"))
+    @JoinColumn(name = "course_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @Column(name = "metadata")
+    private List<String> metadata = new ArrayList();
+
     public Course() {
     }
 
-    public Course(String name, String description, Date deadline, User teacher) {
+    public Course(String name, String description, Date deadline, User teacher, List<String> metadata) {
         this.name = name;
         this.description = description;
         this.deadline = deadline;
         this.teacher = teacher;
+        this.metadata = metadata;
     }
 
     public Integer getId() {
@@ -114,16 +125,24 @@ public class Course {
         this.submissions = submissions;
     }
 
+    public List<String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(List<String> metadata) {
+        this.metadata = metadata;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Course course = (Course) o;
-        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(description, course.description) && Objects.equals(deadline, course.deadline) && Objects.equals(teacher, course.teacher) && Objects.equals(students, course.students) && Objects.equals(words, course.words) && Objects.equals(submissions, course.submissions);
+        return Objects.equals(id, course.id) && Objects.equals(name, course.name) && Objects.equals(description, course.description) && Objects.equals(deadline, course.deadline) && Objects.equals(teacher, course.teacher) && Objects.equals(students, course.students) && Objects.equals(words, course.words) && Objects.equals(submissions, course.submissions) && Objects.equals(metadata, course.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, deadline, teacher, students, words, submissions);
+        return Objects.hash(id, name, description, deadline, teacher, students, words, submissions, metadata);
     }
 }

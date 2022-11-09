@@ -72,7 +72,6 @@ public class WordPairService {
             wordPair.setCourse(storedCourse);
             wordPair.setWord(w.getWord());
             wordPair.setTranslation(w.getTranslation());
-            wordPair.setMetadata(w.getMetadata());
 
             return wordPair;
         }).toList();

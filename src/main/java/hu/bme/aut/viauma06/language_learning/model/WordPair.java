@@ -26,20 +26,12 @@ public class WordPair {
     @JoinColumn(name = "course_id", insertable = false, updatable = false)
     private Course course;
 
-    @ElementCollection
-    @CollectionTable(name = "word_metadata", joinColumns = @JoinColumn(name = "word_id"))
-    @JoinColumn(name = "word_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @Column(name = "metadata")
-    private List<String> metadata = new ArrayList();
-
     public WordPair() {
     }
 
-    public WordPair(String word, String translation, List<String> metadata) {
+    public WordPair(String word, String translation) {
         this.word = word;
         this.translation = translation;
-        this.metadata = metadata;
     }
 
     public Integer getId() {
@@ -74,24 +66,16 @@ public class WordPair {
         this.course = course;
     }
 
-    public List<String> getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(List<String> metadata) {
-        this.metadata = metadata;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WordPair wordPair = (WordPair) o;
-        return Objects.equals(id, wordPair.id) && Objects.equals(word, wordPair.word) && Objects.equals(translation, wordPair.translation) && Objects.equals(course, wordPair.course) && Objects.equals(metadata, wordPair.metadata);
+        return Objects.equals(id, wordPair.id) && Objects.equals(word, wordPair.word) && Objects.equals(translation, wordPair.translation) && Objects.equals(course, wordPair.course);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, word, translation, course, metadata);
+        return Objects.hash(id, word, translation, course);
     }
 }

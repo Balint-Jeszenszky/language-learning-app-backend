@@ -6,16 +6,14 @@ public class WordPairResponse {
     private Integer id;
     private String word;
     private String translation;
-    private List<String> metadata;
 
     public WordPairResponse() {
     }
 
-    public WordPairResponse(Integer id, String word, String translation, List<String> metadata) {
+    public WordPairResponse(Integer id, String word, String translation) {
         this.id = id;
         this.word = word;
         this.translation = translation;
-        this.metadata = metadata;
     }
 
     public Integer getId() {
@@ -40,13 +38,5 @@ public class WordPairResponse {
 
     public void setTranslation(String translation) {
         this.translation = translation;
-    }
-
-    public List<String> getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(List<String> metadata) {
-        this.metadata = metadata;
     }
 }
