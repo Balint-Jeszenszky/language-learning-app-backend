@@ -9,16 +9,18 @@ public class CourseDetailsRequest {
     private String description;
     private Date deadline;
     private List<String> studentEmails;
+    private List<String> metadata;
 
     public CourseDetailsRequest() {
     }
 
-    public CourseDetailsRequest(Integer id, String name, String description, Date deadline, List<String> studentEmails) {
+    public CourseDetailsRequest(Integer id, String name, String description, Date deadline, List<String> studentEmails, List<String> metadata) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.deadline = deadline;
         this.studentEmails = studentEmails;
+        this.metadata = metadata;
     }
 
     public Integer getId() {
@@ -39,5 +41,13 @@ public class CourseDetailsRequest {
 
     public List<String> getStudentEmails() {
         return studentEmails;
+    }
+
+    public List<String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(List<String> metadata) {
+        this.metadata = metadata;
     }
 }

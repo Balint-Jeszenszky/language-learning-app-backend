@@ -142,6 +142,7 @@ public class CourseService {
         storedCourse.setDeadline(courseDetailsRequest.getDeadline());
         storedCourse.setName(courseDetailsRequest.getName());
         storedCourse.setDescription(courseDetailsRequest.getDescription());
+        storedCourse.setMetadata(courseDetailsRequest.getMetadata());
         storedCourse.setStudents(existingUsers);
         courseRepository.save(storedCourse);
 
