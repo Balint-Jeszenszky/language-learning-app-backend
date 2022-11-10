@@ -20,7 +20,7 @@ public class RandomStringGenerator {
         }
 
         return secureRandom.ints(length, 0, chars.length())
-                .mapToObj(i -> chars.charAt(i))
+                .mapToObj(chars::charAt)
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
     }
 }

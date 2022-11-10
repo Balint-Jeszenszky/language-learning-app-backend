@@ -6,6 +6,7 @@ import hu.bme.aut.viauma06.language_learning.model.dto.request.SubmissionRequest
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseDetailsResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.StudentCourseResponse;
+import hu.bme.aut.viauma06.language_learning.model.dto.response.SubmissionResponse;
 import hu.bme.aut.viauma06.language_learning.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -76,5 +77,13 @@ public class CourseController {
         List<StudentCourseResponse> allCoursesForStudent = courseService.getAllCoursesForStudent();
 
         return new ResponseEntity(allCoursesForStudent, HttpStatus.OK);
+    }
+
+    @GetMapping("/{courseId}/student/{studentId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<List<StudentCourseResponse>> getUserSubmissions(@PathVariable("courseId") Integer courseId, @PathVariable("studentId") Integer studentId) {
+        List<SubmissionResponse> submissions = courseService.getUserSubmissions(courseId, studentId);
+
+        return new ResponseEntity(submissions, HttpStatus.OK);
     }
 }

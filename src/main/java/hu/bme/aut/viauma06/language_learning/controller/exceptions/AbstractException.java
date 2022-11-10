@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public abstract class AbstractException extends RuntimeException {
 
-    public AbstractException(String errorMessage) {
+    protected AbstractException(String errorMessage) {
         super(errorMessage);
     }
 

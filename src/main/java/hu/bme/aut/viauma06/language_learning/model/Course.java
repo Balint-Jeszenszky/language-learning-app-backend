@@ -40,7 +40,7 @@ public class Course {
     private List<WordPair> words = new ArrayList();
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "submission_id")
+    @JoinColumn(name = "course_id")
     private List<Submission> submissions = new ArrayList();
 
     @ElementCollection

@@ -167,9 +167,7 @@ public class AuthService {
 
         userRepository.save(user);
 
-        UserDetailsResponse userDetailsResponse = UserMapper.INSTANCE.userToUserDetailsResponse(user);
-
-        return userDetailsResponse;
+        return UserMapper.INSTANCE.userToUserDetailsResponse(user);
     }
 
     @Transactional
