@@ -204,4 +204,18 @@ public class AuthService {
         List<RefreshToken> expired = refreshTokenRepository.findByExpirationLessThan(new Date());
         refreshTokenRepository.deleteAllInBatch(expired);
     }
+
+    @Transactional
+    public void setUserName(String name){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        Optional<User> savedUser = userRepository.findById(userDetails.getId());
+        if (savedUser.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+
+        savedUser.get().setName(name);
+        userRepository.save(savedUser.get());
+    }
 }

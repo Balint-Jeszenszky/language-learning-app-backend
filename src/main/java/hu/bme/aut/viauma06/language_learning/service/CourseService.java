@@ -11,6 +11,7 @@ import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.SubmissionRequest;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseDetailsResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseResponse;
+import hu.bme.aut.viauma06.language_learning.model.dto.response.StudentCourseResponse;
 import hu.bme.aut.viauma06.language_learning.repository.*;
 import hu.bme.aut.viauma06.language_learning.security.service.LoggedInUserService;
 import hu.bme.aut.viauma06.language_learning.service.util.EmailValidator;
@@ -84,7 +85,7 @@ public class CourseService {
 
         validateCourseName(courseRequest.getName());
 
-        Course course = new Course(courseRequest.getName(), courseRequest.getDescription(), courseRequest.getDeadline(), loggedInUser);
+        Course course = new Course(courseRequest.getName(), courseRequest.getDescription(), courseRequest.getDeadline(), loggedInUser, courseRequest.getMetadata());
 
         courseRepository.save(course);
 
@@ -198,5 +199,16 @@ public class CourseService {
         storedCourse.getSubmissions().add(new Submission(user.get(), submissionRequest.getScore()));
 
         courseRepository.save(storedCourse);
+    }
+
+    public List<StudentCourseResponse> getAllCoursesForStudent() {
+        User loggedInUser = loggedInUserService.getLoggedInUser();
+
+        List<Course> coursesByStudent = courseRepository.findCoursesByStudents(loggedInUser);
+
+        return coursesByStudent
+                .stream()
+                .map(c -> CourseMapper.INSTANCE.courseToStudentCourseResponse(c))
+                .toList();
     }
 }

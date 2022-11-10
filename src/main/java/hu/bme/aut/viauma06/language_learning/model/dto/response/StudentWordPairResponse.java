@@ -1,19 +1,19 @@
 package hu.bme.aut.viauma06.language_learning.model.dto.response;
 
-import java.util.List;
-
-public class WordPairResponse {
+public class StudentWordPairResponse {
     private Integer id;
     private String word;
     private String translation;
+    private Boolean saved;
 
-    public WordPairResponse() {
+    public StudentWordPairResponse() {
     }
 
-    public WordPairResponse(Integer id, String word, String translation) {
+    public StudentWordPairResponse(Integer id, String word, String translation, Boolean saved) {
         this.id = id;
         this.word = word;
         this.translation = translation;
+        this.saved = saved;
     }
 
     public Integer getId() {
@@ -38,5 +38,13 @@ public class WordPairResponse {
 
     public void setTranslation(String translation) {
         this.translation = translation;
+    }
+
+    public Boolean getSaved() {
+        return saved;
+    }
+
+    public void setSaved(Boolean saved) {
+        this.saved = saved;
     }
 }

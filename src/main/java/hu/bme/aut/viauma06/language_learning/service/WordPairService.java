@@ -7,6 +7,7 @@ import hu.bme.aut.viauma06.language_learning.model.Course;
 import hu.bme.aut.viauma06.language_learning.model.User;
 import hu.bme.aut.viauma06.language_learning.model.WordPair;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.WordPairRequest;
+import hu.bme.aut.viauma06.language_learning.model.dto.response.StudentWordPairResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.WordPairResponse;
 import hu.bme.aut.viauma06.language_learning.repository.CourseRepository;
 import hu.bme.aut.viauma06.language_learning.repository.UserRepository;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class WordPairService {
@@ -72,7 +72,6 @@ public class WordPairService {
             wordPair.setCourse(storedCourse);
             wordPair.setWord(w.getWord());
             wordPair.setTranslation(w.getTranslation());
-            wordPair.setMetadata(w.getMetadata());
 
             return wordPair;
         }).toList();
@@ -123,5 +122,20 @@ public class WordPairService {
         storedUser.getSavedWordPairs().removeIf(w -> w.getId().equals(id));
 
         userRepository.save(storedUser);
+    }
+
+    @Transactional
+    public List<StudentWordPairResponse> getWordPairsAndSavedStatusByCourseId(Integer id){
+        User loggedInUser = loggedInUserService.getLoggedInUser();
+        Optional<Course> course = courseRepository.findByIdAndStudents(id, loggedInUser);
+        if (course.isEmpty()) {
+            throw new NotFoundException("Course not found");
+        }
+
+        List<WordPair> wordPairs = wordPairRepository.findAllByCourseId(id);
+
+        List<WordPair> savedWordPairs = userRepository.findById(loggedInUser.getId()).get().getSavedWordPairs();
+
+        return wordPairs.stream().map(w -> WordPairMapper.INSTANCE.wordPairToStudentWordPairResponse(w, savedWordPairs.contains(w))).toList();
     }
 }

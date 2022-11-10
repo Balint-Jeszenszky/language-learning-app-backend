@@ -1,6 +1,7 @@
 package hu.bme.aut.viauma06.language_learning.mapper;
 
 import hu.bme.aut.viauma06.language_learning.model.WordPair;
+import hu.bme.aut.viauma06.language_learning.model.dto.response.StudentWordPairResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.WordPairResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -10,4 +11,6 @@ public interface WordPairMapper {
     WordPairMapper INSTANCE = Mappers.getMapper(WordPairMapper.class);
 
     WordPairResponse wordPairToWordPairResponse(WordPair wordPair);
+
+    StudentWordPairResponse wordPairToStudentWordPairResponse(WordPair wordPair, Boolean saved);
 }

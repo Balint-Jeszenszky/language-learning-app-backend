@@ -10,6 +10,7 @@ import hu.bme.aut.viauma06.language_learning.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +47,14 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity logout(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         authService.logout(refreshTokenRequest.getRefreshToken());
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/name")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity name(@RequestBody String name) {
+        authService.setUserName(name);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
