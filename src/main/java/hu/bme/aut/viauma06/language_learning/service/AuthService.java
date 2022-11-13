@@ -122,6 +122,11 @@ public class AuthService {
     }
 
     public UserDetailsResponse registerTeacher(RegistrationRequest registrationRequest) {
+        if (registrationRequest.getHasStudentAccount()) {
+            User user = addTeacherRole(registrationRequest);
+            return UserMapper.INSTANCE.userToUserDetailsResponse(user);
+        }
+
         String email = registrationRequest.getEmail().toLowerCase();
 
         if (registrationRequest.getName().length() < 3) {
@@ -132,14 +137,7 @@ public class AuthService {
             throw new BadRequestException("Error: Email is invalid!");
         }
 
-        Optional<Role> role = roleRepository.findByName(ERole.ROLE_TEACHER);
-
-        if (role.isEmpty()) {
-            createDefaultRoles();
-            role = roleRepository.findByName(ERole.ROLE_TEACHER);
-        }
-
-        if (userRepository.existsByEmailAndRolesIn(email, Set.of(role.get()))) {
+        if (userRepository.existsByEmail(email)) {
             throw new BadRequestException("Error: Email is already in use!");
         }
 
@@ -149,6 +147,12 @@ public class AuthService {
 
         if (!registrationRequest.getPassword().equals(registrationRequest.getConfirmPassword())) {
             throw new BadRequestException("Error: Passwords not match!");
+        }
+
+        Optional<Role> role = roleRepository.findByName(ERole.ROLE_TEACHER);
+
+        if (role.isEmpty()) {
+            createDefaultRoles();
         }
 
         Set<Role> roles = new HashSet<>();
@@ -168,6 +172,38 @@ public class AuthService {
         userRepository.save(user);
 
         return UserMapper.INSTANCE.userToUserDetailsResponse(user);
+    }
+
+    private User addTeacherRole(RegistrationRequest registrationRequest) {
+        Optional<User> registeredUser = userRepository.findByEmail(registrationRequest.getEmail());
+
+        if (registeredUser.isEmpty()) {
+            throw new NotFoundException("User not found");
+        }
+
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(registrationRequest.getEmail().toLowerCase(), registrationRequest.getPassword()));
+        } catch (AuthenticationException e) {
+            throw new UnauthorizedException("User not found");
+        }
+
+        User user = userRepository.findById(((UserDetailsImpl) authentication.getPrincipal()).getId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (user.getName() == null || !registrationRequest.getName().trim().isEmpty()) {
+            if (registrationRequest.getName().trim().length() < 3) {
+                throw new BadRequestException("Error: Name should be at least 3 characters long!");
+            } else {
+                user.setName(registrationRequest.getName().trim());
+            }
+        }
+
+        user.getRoles().add(roleRepository.findByName(ERole.ROLE_TEACHER)
+                .orElseThrow(() -> new InternalServerErrorException("Error: Role is not found.")));
+
+        return userRepository.save(user);
     }
 
     @Transactional

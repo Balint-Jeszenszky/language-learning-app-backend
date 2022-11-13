@@ -1,6 +1,7 @@
 package hu.bme.aut.viauma06.language_learning.service;
 
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.BadRequestException;
+import hu.bme.aut.viauma06.language_learning.controller.exceptions.ForbiddenException;
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.InternalServerErrorException;
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.NotFoundException;
 import hu.bme.aut.viauma06.language_learning.mapper.CourseMapper;
@@ -194,6 +195,12 @@ public class CourseService {
 
         if (course.isEmpty()) {
             throw new NotFoundException("Course not found");
+        }
+
+        Course storedCourse = course.get();
+
+        if (storedCourse.getDeadline().before(new Date())) {
+            throw new ForbiddenException("Course expired");
         }
 
         Submission submission = new Submission(user.get(), submissionRequest.getScore(), course.get());
