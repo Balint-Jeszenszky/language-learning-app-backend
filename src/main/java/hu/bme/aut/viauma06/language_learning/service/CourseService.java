@@ -1,9 +1,11 @@
 package hu.bme.aut.viauma06.language_learning.service;
 
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.BadRequestException;
+import hu.bme.aut.viauma06.language_learning.controller.exceptions.ForbiddenException;
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.InternalServerErrorException;
 import hu.bme.aut.viauma06.language_learning.controller.exceptions.NotFoundException;
 import hu.bme.aut.viauma06.language_learning.mapper.CourseMapper;
+import hu.bme.aut.viauma06.language_learning.mapper.SubmissionMapper;
 import hu.bme.aut.viauma06.language_learning.model.*;
 import hu.bme.aut.viauma06.language_learning.model.dto.StudentDto;
 import hu.bme.aut.viauma06.language_learning.model.dto.request.CourseDetailsRequest;
@@ -12,6 +14,7 @@ import hu.bme.aut.viauma06.language_learning.model.dto.request.SubmissionRequest
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseDetailsResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.CourseResponse;
 import hu.bme.aut.viauma06.language_learning.model.dto.response.StudentCourseResponse;
+import hu.bme.aut.viauma06.language_learning.model.dto.response.SubmissionResponse;
 import hu.bme.aut.viauma06.language_learning.repository.*;
 import hu.bme.aut.viauma06.language_learning.security.service.LoggedInUserService;
 import hu.bme.aut.viauma06.language_learning.service.util.EmailValidator;
@@ -36,6 +39,9 @@ public class CourseService {
     private RoleRepository roleRepository;
 
     @Autowired
+    private SubmissionRepository submissionRepository;
+
+    @Autowired
     private LoggedInUserService loggedInUserService;
 
     @Autowired
@@ -51,7 +57,7 @@ public class CourseService {
 
         return coursesByTeacher
                 .stream()
-                .map(c -> CourseMapper.INSTANCE.courseToCourseResponse(c))
+                .map(CourseMapper.INSTANCE::courseToCourseResponse)
                 .toList();
     }
 
@@ -66,9 +72,7 @@ public class CourseService {
 
         CourseDetailsResponse courseDetailsResponse = CourseMapper.INSTANCE.courseToCourseDetailsResponse(course.get());
         Map<User, Integer> studentScores = new HashMap();
-        course.get().getSubmissions().forEach(s -> {
-            studentScores.put(s.getStudent(), s.getScore());
-        });
+        course.get().getSubmissions().forEach(s -> studentScores.put(s.getStudent(), s.getScore()));
 
         List<StudentDto> students = course.get().getStudents()
                 .stream()
@@ -142,21 +146,20 @@ public class CourseService {
         storedCourse.setDeadline(courseDetailsRequest.getDeadline());
         storedCourse.setName(courseDetailsRequest.getName());
         storedCourse.setDescription(courseDetailsRequest.getDescription());
+        storedCourse.setMetadata(courseDetailsRequest.getMetadata());
         storedCourse.setStudents(existingUsers);
         courseRepository.save(storedCourse);
 
-        newUserEmailAndPassword.entrySet().forEach(e -> {
-            sendMail.sendSimpleMessage(
-                    e.getKey(),
-                    "Registration to " + storedCourse.getName() + " language course",
-                    "Hi! "
-                            + storedCourse.getTeacher().getName()
-                            + "registered you to "
-                            + storedCourse.getName()
-                            + " language course! You can log in with your email and this password: "
-                            + e.getValue()
-            );
-        });
+        newUserEmailAndPassword.forEach((k, v) -> sendMail.sendSimpleMessage(
+                k,
+                "Registration to " + storedCourse.getName() + " language course",
+                "Hi! "
+                        + storedCourse.getTeacher().getName()
+                        + "registered you to "
+                        + storedCourse.getName()
+                        + " language course! You can log in with your email and this password: "
+                        + v
+        ));
 
         return CourseMapper.INSTANCE.courseToCourseDetailsResponse(storedCourse);
     }
@@ -196,9 +199,13 @@ public class CourseService {
 
         Course storedCourse = course.get();
 
-        storedCourse.getSubmissions().add(new Submission(user.get(), submissionRequest.getScore()));
+        if (storedCourse.getDeadline().before(new Date())) {
+            throw new ForbiddenException("Course expired");
+        }
 
-        courseRepository.save(storedCourse);
+        Submission submission = new Submission(user.get(), submissionRequest.getScore(), course.get());
+
+        submissionRepository.save(submission);
     }
 
     public List<StudentCourseResponse> getAllCoursesForStudent() {
@@ -208,7 +215,13 @@ public class CourseService {
 
         return coursesByStudent
                 .stream()
-                .map(c -> CourseMapper.INSTANCE.courseToStudentCourseResponse(c))
+                .map(CourseMapper.INSTANCE::courseToStudentCourseResponse)
                 .toList();
+    }
+
+    public List<SubmissionResponse> getUserSubmissions(Integer courseId, Integer studentId) {
+        List<Submission> submissions = submissionRepository.findAllByCourseIdAndStudentIdOrderBySubmittedAt(courseId, studentId);
+
+        return submissions.stream().map(SubmissionMapper.INSTANCE::submissionToSubmissionResponse).toList();
     }
 }

@@ -5,15 +5,17 @@ public class RegistrationRequest {
     private String email;
     private String password;
     private String confirmPassword;
+    private Boolean hasStudentAccount;
 
     public RegistrationRequest() {
     }
 
-    public RegistrationRequest(String name, String email, String password, String confirmPassword) {
+    public RegistrationRequest(String name, String email, String password, String confirmPassword, Boolean hasStudentAccount) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+        this.hasStudentAccount = hasStudentAccount;
     }
 
     public String getName() {
@@ -30,5 +32,9 @@ public class RegistrationRequest {
 
     public String getConfirmPassword() {
         return confirmPassword;
+    }
+
+    public Boolean getHasStudentAccount() {
+        return hasStudentAccount;
     }
 }

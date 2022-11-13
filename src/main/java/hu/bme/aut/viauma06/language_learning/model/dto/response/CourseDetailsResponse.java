@@ -11,16 +11,18 @@ public class CourseDetailsResponse {
     private String description;
     private Date deadline;
     private List<StudentDto> students;
+    private List<String> metadata;
 
     public CourseDetailsResponse() {
     }
 
-    public CourseDetailsResponse(Integer id, String name, String description, Date deadline, List<StudentDto> students) {
+    public CourseDetailsResponse(Integer id, String name, String description, Date deadline, List<StudentDto> students, List<String> metadata) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.deadline = deadline;
         this.students = students;
+        this.metadata = metadata;
     }
 
     public Integer getId() {
@@ -61,5 +63,13 @@ public class CourseDetailsResponse {
 
     public void setStudents(List<StudentDto> students) {
         this.students = students;
+    }
+
+    public List<String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(List<String> metadata) {
+        this.metadata = metadata;
     }
 }

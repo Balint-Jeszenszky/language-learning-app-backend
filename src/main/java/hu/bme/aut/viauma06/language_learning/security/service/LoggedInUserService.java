@@ -35,6 +35,6 @@ public class LoggedInUserService {
     public boolean isTeacher() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        return authorities.stream().map(a -> a.getAuthority()).toList().contains(ROLE_TEACHER.name());
+        return authorities.stream().map(GrantedAuthority::getAuthority).toList().contains(ROLE_TEACHER.name());
     }
 }

@@ -44,7 +44,7 @@ public class WordPairService {
 
         List<WordPair> wordPairs = wordPairRepository.findAllByCourseId(id);
 
-        return wordPairs.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).toList();
+        return wordPairs.stream().map(WordPairMapper.INSTANCE::wordPairToWordPairResponse).toList();
     }
 
     @Transactional
@@ -83,7 +83,7 @@ public class WordPairService {
         storedCourse.getWords().addAll(words);
         wordPairRepository.saveAll(words);
 
-        return words.stream().map(w -> WordPairMapper.INSTANCE.wordPairToWordPairResponse(w)).toList();
+        return words.stream().map(WordPairMapper.INSTANCE::wordPairToWordPairResponse).toList();
     }
 
     public void saveWordPair(Integer id) {

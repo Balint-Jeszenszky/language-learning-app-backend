@@ -8,6 +8,7 @@ import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -43,7 +44,7 @@ public class JwtUtils {
                 .claim("type", "access")
                 .claim(NAME, userDetails.getName())
                 .claim(ID, userDetails.getId())
-                .claim(ROLES, userDetails.getAuthorities().stream().map(a -> a.getAuthority()).toList())
+                .claim(ROLES, userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
